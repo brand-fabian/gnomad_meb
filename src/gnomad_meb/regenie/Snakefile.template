@@ -1,0 +1,16 @@
+configfile: "$configfile"
+
+include: "$gwas_base/meta.smk"
+
+rule all:
+    input:
+        regenie_gwas=[
+            f"{config['output_dir']}/gwas/{phenotype}/{config['project']}_Y{i + 1}_{phenotype}.regenie.gz"
+            for i, phenotype in enumerate(phenotypes)
+        ],
+        regenie_burden=[
+            f"{config['output_dir']}/burden/{phenotype}/{config['project']}_Y{i + 1}_{phenotype}.regenie.gz"
+            for i, phenotype in enumerate(phenotypes)
+        ]
+
+include: "$gwas_base/regenie.smk"

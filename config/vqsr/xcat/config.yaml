@@ -1,0 +1,4 @@
+# Snakemake workflow-profile vqsr
+jobs: 100
+default-resources:
+  slurm_partition: ampere

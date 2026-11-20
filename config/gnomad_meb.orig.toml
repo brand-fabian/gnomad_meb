@@ -1,0 +1,200 @@
+project = "alopecia-areata.grch38"
+scratch_dir = "/home/brand/scratch/hail"
+checkpoint = "/home/brand/Projects/gnomad/scratch/checkpoints"
+
+[s3]
+endpoint_url = "https://s3.intra.imbie"
+verify = false
+
+[resources]
+calling_intervals = "/home/brand/scratch/library_hg38/wgs_calling_regions.hg38.interval_list"
+telomeres_and_centromeres = "/ceph01/scratch/brand/annotation/hail/hg38.telomeresAndMergedCentromeres.ht"
+lcr_intervals = "/ceph01/scratch/brand/annotation/hail/lcr_intervals/LCRFromHengHg38.ht"
+seg_dup_intervals = "/ceph01/scratch/brand/annotation/hail/seg_dup_intervals/GRCh38_segdups.ht"
+gnomad_v4 = "/ceph01/scratch/brand/annotation/hail/gnomad.genomes.v4.1.sites.ht"
+gnomad_pca_loadings = "/ceph01/scratch/brand/annotation/hail/ancestry_classification/gnomad.v4.0.pca_loadings.ht"
+gnomad_pca_model = "/ceph01/scratch/brand/annotation/hail/ancestry_classification/gnomad.v4.0.RF_fit.onnx"
+reference = "/ceph01/scratch/brand/library_hg38/Homo_sapiens_assembly38.fasta"
+
+[vqsr]
+log_dir = "/ceph01/scratch/brand/Projects/gnomad/vqsr/logs"
+output_dir = "/ceph01/scratch/brand/Projects/gnomad/vqsr/output"
+scatter = 10
+
+[vqsr.resources]
+hapmap = "/home/brand/scratch/library_hg38/hapmap_3.3.hg38.vcf.gz"
+omni = "/home/brand/scratch/library_hg38/1000G_omni2.5.hg38.vcf.gz"
+dbsnp = "/home/brand/scratch/library_hg38/Homo_sapiens_assembly38.dbsnp138.vcf"
+thousand_genome = "/home/brand/scratch/library_hg38/1000G_phase1.snps.high_confidence.hg38.vcf.gz"
+mills = "/ceph01/scratch/brand/library_hg38/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz"
+axiom_poly = "/ceph01/scratch/brand/library_hg38/Axiom_Exome_Plus.genotypes.all_populations.poly.hg38.vcf.gz"
+
+[sample_qc]
+
+[variant_qc]
+
+[variant_qc.resources]
+pre_vqsr_ht = "s3://vds-test/alopecia-areata/grch38/alopecia-areata.grch38/intermediate/variant_qc/as_info.ht"
+
+[hail]
+# driver_memory_gb = 56  # explicit driver heap (GB); unset => driver_memory_fraction of node memory
+# driver_memory_fraction = 0.8  # fraction of node memory for the driver heap
+tmp_dir = "s3://vds-test/hail-tmp"
+
+[annotation]
+cohort = "alopecia-areata"
+
+[annotation.resources]
+clinvar_vcf = "/ceph01/scratch/brand/library_hg38/clinvar_20250706.vcf.gz"
+variant_qc = "/ceph01/scratch/brand/Projects/gnomad/checkpoints/alopecia-areata.grch38/variant_qc.ht"
+sample_qc = "s3://vds-test/alopecia-areata/grch38/alopecia-areata.grch38/sample_qc.ht"
+
+[annotation.vep]
+vep = "/ceph01/homedirs/brand/Projects/gnomad/static/vep.sh"
+cache_dir = "/ceph01/scratch/brand/Projects/gnomad/vep/110"
+alpha_missense = "/ceph01/scratch/brand/annotation/alphamissense/AlphaMissense_hg38.tsv.gz"
+loftee_base = "/ceph01/scratch/brand/annotation/loftee/loftee"
+loftee_data = "/ceph01/scratch/brand/annotation/loftee/GRCh38"
+cadd = "/ceph01/scratch/brand/annotation/cadd/v1.7_whole_genome_SNVs.tsv.gz"
+cadd_indel = "/ceph01/scratch/brand/annotation/cadd/v1.7_gnomad.genomes.r4.0.indel_inclAnno.tsv.gz"
+splice_ai = "/ceph01/scratch/brand/annotation/spliceai/spliceai_scores.raw.snv.hg38.vcf.gz"
+utr_annotator = "/ceph01/scratch/brand/annotation/utrannotator/uORF_5UTR_GRCh38_PUBLIC.txt"
+revel = "/ceph01/scratch/brand/annotation/revel/revel_scores.grch38.tsv.gz"
+phylop = "/ceph01/scratch/brand/annotation/phylop/hg38.phyloP100way.bw"
+
+[gwas]
+# Input: ``gwas export`` and ``gwas workflow`` take exactly one of ``--mt`` (a
+# single MatrixTable) or ``--manifest`` (the Filter stage's manifest.json.gz).
+# With ``--manifest``, one dataset is built per selected table -- the
+# high-quality basis, each filter's matrix and each filter-region matrix --
+# selected by ``--include``/``--exclude`` (tokens match a label, filter name or
+# region name; include first, then exclude). ``gwas workflow`` composes export,
+# regenie and load into one deterministic DAG in a single invocation.
+#
+# The export applies the ``min_case_count`` gate and writes only the selected
+# phenotype columns, so the exported phenotype table is the single source of
+# truth every downstream stage reads.
+log_dir = "/ceph01/scratch/brand/Projects/gnomad/gwas/100000bp/logs"
+output_dir = "/ceph01/scratch/brand/Projects/gnomad/gwas/100000bp/output"
+metadata_csv = "/path/to/alopecia-areata.radar.covid.md.csv"
+case_cohort = "alopecia-areata"
+control_cohorts = ["radar"]
+drop_cohorts = ["covid"]
+rare_variants_maf = 0.01
+min_cadd = 20.0
+intercept = true
+# existing runner knobs stay: log_dir, output_dir, snakemake,
+# min_case_count, min_mac, min_geno_frac, min_maf, hwe, snps_only, min_n_snps.
+#
+# ``min_n_snps`` is the deterministic size floor: tables with fewer variants
+# (or no recorded count) are dropped at inventory selection, before any stage
+# runs. The default targets WGS.
+
+# The regenie chunk count is now data-driven: the run stage derives it from each
+# dataset's recorded variant count, targeting this many variants per split
+# (``n_chunks`` has been removed).
+variants_per_split = 100000
+
+[gwas.responses]
+# The case/control response is always produced; this names it.
+case = "case"
+# Controls are missing for the ``set`` responses below.
+case_only = true
+
+# Each column is one response source: ``set`` columns fan out per distinct
+# value (minus ``exclude``); ``binary``/``quantitative`` columns are used
+# directly. ``metadata_field`` names the metadata CSV column and defaults to
+# ``name``.
+[[gwas.responses.columns]]
+name = "comorbidities"
+kind = "set"
+exclude = ["hypertension", "thyroid"]
+[[gwas.responses.columns]]
+name = "comorbidities_thyroid"
+kind = "set"
+exclude = ["other_ai_thyroid_disease"]
+[[gwas.responses.columns]]
+name = "other_autoimmune_comorbidities"
+kind = "set"
+exclude = []
+
+# Covariates regenie is adjusted for, in output order. `metadata_field` names
+# the external CSV column; `age` is the explicit birthdate -> age rewrite and
+# `ancestry.pca_scores` is an array field fanned out per `indices`.
+[[gwas.covariates]]
+name = "age"
+metadata_field = "birthdate"
+[[gwas.covariates]]
+name = "sex"
+metadata_field = "sex"
+[[gwas.covariates]]
+name = "ancestry.pca_scores"
+indices = [0, 1, 2]
+
+[[gwas.regions]]
+kind = "gene"
+
+[filter.resources]
+constraints = "/home/brand/scratch/annotation/hail/gnomad.v4.1.constraint_metrics.ht"
+
+[[filter.filters]]
+name = "rare_clinvar_pathogenic"
+max_gnomad_af = 0.01
+filter_clinvar_pathogenic = true
+
+[[filter.filters]]
+name = "all_clinvar_pathogenic"
+filter_clinvar_pathogenic = true
+
+[[filter.filters]]
+name = "rare_deleterious_missense"
+max_gnomad_af = 0.01
+min_cadd = 20.0
+impact = ["HIGH", "MODERATE"]
+
+[[filter.filters]]
+name = "rare_high_impact"
+max_gnomad_af = 0.01
+impact = ["HIGH"]
+
+[[filter.filters]]
+name = "all_lof"
+impact = ["HIGH", "MODERATE"]
+
+[[filter.filters]]
+name = "rare_lof_constrained"
+max_gnomad_af = 0.01
+min_pLI = 0.9
+min_z_score = 5.0
+min_cadd = 20.0
+impact = ["HIGH", "MODERATE"]
+
+[[filter.filters]]
+name = "common_variants"
+min_gnomad_af = 0.05
+
+[[filter.filters]]
+name = "rare_variants"
+max_gnomad_af = 0.01
+
+[[filter.filters]]
+name = "clinvar_pathogenic_lof"
+min_cadd = 20.0
+impact = ["HIGH", "MODERATE"]
+filter_clinvar_pathogenic = true
+
+[[filter.filters]]
+name = "splice_site_variants"
+filter_splice_variants = true
+
+[browser_export]
+# Optional passthrough annotations. The browser's mandatory columns
+# (locus/alleles/variant_id/xpos/rsids/caid/exome/genome/joint/
+# transcript_consequences/in_silico_predictors/coverage) are always written.
+# `joint`, `genome.quality_metrics` and `coverage` are synthesized from required
+# source columns (freq/freq_meta, grpmax, fafmax, histograms, filters,
+# coverage_stats/coverage_stats_meta); those source fields are consumed and must
+# not be listed here. A missing required source column fails loudly rather than
+# emitting a typed null. `gnomad_freq`/`clinvar` are backend-ignored
+# passthroughs, off by default; a listed field absent on the input is dropped.
+fields = ["in_silico_predictors"]

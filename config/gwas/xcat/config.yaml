@@ -1,0 +1,14 @@
+# Snakemake workflow-profile gwas
+default-resources:
+  slurm_partition: batch
+  gres: "localtmp:100G"
+set-resources:
+  regenie_merge:
+    slurm_partition: batch
+    mem_mb: 190000
+  regenie_burden:
+    slurm_partition: ampere
+    mem_mb: 490000
+set-threads:
+  regenie_merge: 22
+  regenie_burden: 30

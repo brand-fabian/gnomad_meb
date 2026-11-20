@@ -1,0 +1,8 @@
+name: gatk GatherTranches
+description: Wrapper for gatk GatherTranches (VQSR scatter-gather workflow)
+authors:
+  - Fabian Brand
+input:
+  - tranches from multiple variant recalibrator runs
+output:
+  - global tranches file

@@ -1,0 +1,16 @@
+[submodule "third_party/gnomad_qc"]
+	path = third_party/gnomad_qc
+	url = https://github.com/broadinstitute/gnomad_qc
+[submodule "third_party/gnomad_methods"]
+	path = third_party/gnomad_methods
+	url = https://github.com/broadinstitute/gnomad_methods
+[submodule "third_party/genohype"]
+	path = third_party/genohype
+	url = https://github.com/broadinstitute/genohype
+[submodule "third_party/fastVEP"]
+	path = third_party/fastVEP
+	url = https://github.com/mattsolo1/fastVEP
+	branch = genohype-integration
+[submodule "third_party/gnomad-browser-lite"]
+	path = third_party/gnomad-browser-lite
+	url = https://github.com/broadinstitute/gnomad-browser-lite

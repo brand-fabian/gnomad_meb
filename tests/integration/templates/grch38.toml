@@ -1,0 +1,102 @@
+# GRCh38 integration-test configuration template.
+#
+# The tests render this file with harness.render_config, substituting:
+#   $project    - the test project name (scopes {checkpoint}/$project/... paths)
+#   $run_dir    - the reference-scoped session directory (shared across workers)
+#   $checkpoint - the session-shared hail checkpoint directory
+#   $scratch_dir - this worker's scratch directory
+#   $hail_tmp   - this worker's hail temporary directory
+#   $ref_root   - GMEB_TEST_REF_ROOT, the reference-resource root
+#
+# The resource paths below are expressed relative to $ref_root, which is
+# expected to contain the reference and annotation resources in the layout:
+#
+#   $ref_root/library_hg38/   GATK reference bundle, reference FASTA, clinvar
+#   $ref_root/annotation/     hail annotation tables and VEP/CADD/... data
+#   $ref_root/vep/110/        VEP cache
+#
+# The upstream artifacts (VDS, checkpoints, VQSR output) live under $run_dir,
+# which is reference-scoped and shared across workers; scratch and hail temp
+# stay per worker via $scratch_dir/$hail_tmp.
+
+project = "$project"
+scratch_dir = "$scratch_dir"
+checkpoint = "$checkpoint"
+
+[resources]
+calling_intervals = "$ref_root/library_hg38/wgs_calling_regions.hg38.interval_list"
+telomeres_and_centromeres = "$ref_root/annotation/hail/hg38.telomeresAndMergedCentromeres.ht"
+lcr_intervals = "$ref_root/annotation/hail/lcr_intervals/LCRFromHengHg38.ht"
+seg_dup_intervals = "$ref_root/annotation/hail/seg_dup_intervals/GRCh38_segdups.ht"
+gnomad_v4 = "$ref_root/annotation/hail/gnomad.genomes.v4.1.sites.ht"
+gnomad_pca_loadings = "$ref_root/annotation/hail/ancestry_classification/gnomad.v4.0.pca_loadings.ht"
+gnomad_pca_model = "$ref_root/annotation/hail/ancestry_classification/gnomad.v4.0.RF_fit.onnx"
+reference = "$ref_root/library_hg38/Homo_sapiens_assembly38.fasta"
+
+[vqsr]
+log_dir = "$run_dir/logs/vqsr"
+output_dir = "$run_dir/output/vqsr"
+snakemake = [ "--profile", "$template_root/vqsr_test" ]
+
+[vqsr.resources]
+hapmap = "$ref_root/library_hg38/hapmap_3.3.hg38.vcf.gz"
+omni = "$ref_root/library_hg38/1000G_omni2.5.hg38.vcf.gz"
+dbsnp = "$ref_root/library_hg38/Homo_sapiens_assembly38.dbsnp138.vcf"
+thousand_genome = "$ref_root/library_hg38/1000G_phase1.snps.high_confidence.hg38.vcf.gz"
+mills = "$ref_root/library_hg38/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz"
+axiom_poly = "$ref_root/library_hg38/Axiom_Exome_Plus.genotypes.all_populations.poly.hg38.vcf.gz"
+
+[sample_qc]
+
+[variant_qc]
+# The fixed VCF header used when importing the recalibrated VQSR VCF; it lives
+# in the repository's static directory (rendered as $vqsr_header by the harness).
+import_header_fixed = "$vqsr_header"
+
+[hail]
+tmp_dir = "$hail_tmp"
+partitions_per_core = 10
+
+[annotation]
+cohort = "gnomad-meb-test"
+vep_config_path = "$vep_root/vep/hail_vep.json"
+
+[annotation.resources]
+clinvar_vcf = "$ref_root/library_hg38/clinvar_20250706.vcf.gz"
+variant_qc = "$checkpoint/$project/variant_qc.ht"
+sample_qc = "$checkpoint/$project/sample_qc.ht"
+
+[annotation.vep]
+vep = "$vep_exe"
+cache_dir = "$vep_root/vep/110"
+alpha_missense = "$ref_root/annotation/alphamissense/AlphaMissense_hg38.tsv.gz"
+loftee_base = "$ref_root/annotation/loftee/loftee"
+loftee_data = "$ref_root/annotation/loftee/GRCh38"
+cadd = "$ref_root/annotation/cadd/v1.7_whole_genome_SNVs.tsv.gz"
+cadd_indel = "$ref_root/annotation/cadd/v1.7_gnomad.genomes.r4.0.indel_inclAnno.tsv.gz"
+splice_ai = "$ref_root/annotation/spliceai/spliceai_scores.raw.snv.hg38.vcf.gz"
+utr_annotator = "$ref_root/annotation/utrannotator/uORF_5UTR_GRCh38_PUBLIC.txt"
+revel = "$ref_root/annotation/revel/revel_scores.grch38.tsv.gz"
+phylop = "$ref_root/annotation/phylop/hg38.phyloP100way.bw"
+
+[filter]
+# The fixture callset is 14 samples, so the cohort-scale sample-QC hard filters
+# (low_coverage, low_bases_dp_over_1/20) flag every sample and would leave the
+# callset empty. Keep all samples for this test run.
+apply_sample_filters = false
+
+[filter.resources]
+# The gnomAD LoF constraint metrics the Filter stage's fixed
+# annotate_constraints_table step reads; a reference-root annotation table like
+# the others, so a missing table is a hard error, not a skipped step.
+constraints = "$ref_root/annotation/hail/gnomad.v4.1.constraint_metrics.ht"
+
+# A small, AF-based filter set (no regions): enough to exercise the per-filter
+# steps without re-deriving production's cohort-scale filter declarations.
+[[filter.filters]]
+name = "rare_variants"
+max_gnomad_af = 0.01
+
+[[filter.filters]]
+name = "common_variants"
+min_gnomad_af = 0.05

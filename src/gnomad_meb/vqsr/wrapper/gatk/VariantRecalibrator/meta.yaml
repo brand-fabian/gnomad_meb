@@ -1,0 +1,8 @@
+name: gatk VariantRecalibrator
+description: Wrapper for the VariantRecalibrator, supporting different calling combinations
+authors:
+  - Fabian Brand
+input:
+  - site only vcf file
+output:
+  - depends on mode / tool invocation

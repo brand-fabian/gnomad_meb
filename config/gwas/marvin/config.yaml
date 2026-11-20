@@ -1,0 +1,7 @@
+# Snakemake workflow-profile vqsr
+default-resources:
+  slurm_partition: intelsr_medium
+  slurm_extra: str("")
+# set-resources requires at least one argument
+# set-resources: {}
+

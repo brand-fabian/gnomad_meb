@@ -1,0 +1,8 @@
+name: regenie
+description: Wrapper for regenie commands.
+authors:
+  - Fabian Brand
+input:
+  - plink2 bed/bim/fam or bgen/sample files
+output:
+  - regenie outputs

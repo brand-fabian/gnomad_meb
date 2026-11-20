@@ -1,0 +1,14 @@
+# Snakemake workflow-profile vqsr
+jobs: 100
+max-jobs-per-second: 3
+use-conda: true
+rerun-incomplete: true
+keep-going: true
+executor: slurm
+precommand: 'module purge && source ~/.bashrc && conda_init'
+default-resources:
+  slurm_partition: intelsr_medium
+  slurm_extra: str("")
+# set-resources requires at least one argument
+# set-resources: {}
+

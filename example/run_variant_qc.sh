@@ -1,0 +1,3 @@
+srun --pty --cpus-per-task 20 --mem-per-cpu 4G --nodes 20 --constraint CpuNehalem --time 12:00:00 --partition batch bash
+
+source config/slurm/xcat.sh; bash ~/misc/spark/spark.sh --conda-module $CONDA_MODULE --spark-module $SPARK_MODULE --spark-version $SPARK_VERSION --hail-version 0.2.133 --conda-init "$CONDA_INIT" --conda-env "gnomad" -Xi --install-s3-connector -s "module load lang/Miniconda3 lang/Java/11; conda activate gnomad; poetry run python3 main.py --config config/gnomad_meb.toml --verbose debug variant-qc export --vds $VQC_EXPORT_VDS --as-info $VQC_EXPORT_AS_OUT --quasi-info $VQC_EXPORT_QUASI_OUT"

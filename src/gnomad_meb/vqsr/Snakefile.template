@@ -1,0 +1,16 @@
+configfile: "$configfile"
+
+rule all:
+    input:
+        [
+            f"{config['output_dir']}/task-{task}/vqsr.vcf.bgz"
+            for task in config["tasks"]
+        ]
+        # The gathered tranches are declared outputs in their own right: the
+        # import stage parses them for the applied VQSLOD cutoffs.
+        + [
+            f"{config['output_dir']}/vqsr.snp.tranches.txt",
+            f"{config['output_dir']}/vqsr.indel.tranches.txt",
+        ],
+
+include: "$vqsr_base/gatk.smk"

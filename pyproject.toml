@@ -1,0 +1,114 @@
+[project]
+name = "gnomad-meb"
+version = "0.0.1"
+description = "Utilities for working with gnomad workflows."
+authors = [{ name = "Fabian Brand", email = "brand@imbie.meb.uni-bonn.de" }]
+requires-python = ">=3.11,<4"
+readme = "README.md"
+license = "LicenseRef-Proprietary"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "gnomad",
+    "gnomad-qc",
+    "click>=8.1.7,<9",
+    "rich>=12.6.0,<13",
+    "s3fs>=2024.10.0,<2025",
+    "hail>=0.2.129,<0.2.139",
+    "intervaltree>=3.1,<4",
+    "psutil>=6.1.0,<7",
+    "pyyaml>=6.0.2,<7",
+    "snakemake>=9.9.0,<10",
+    "plotnine>=0.15.0,<0.16",
+    "pyarrow>=17.0.0,<26",
+    "pyensembl>=2.10.4",
+    "pydantic>=2.6,<3",
+    "pydantic-settings>=2.6,<3",
+    "submitit>=1.4,<2",
+]
+
+[dependency-groups]
+dev = [
+    "marimo>=0.24.0",
+    "pytest>=8.3.0,<10",
+    "ruff>=0.12.8,<0.13",
+]
+hpc = [
+    "snakemake-executor-plugin-slurm>=2.8.0",
+]
+report = [
+    "plotnine>=0.15.0,<0.16",
+    "upsetplot>=0.9.0,<0.10",
+    "seaborn>=0.13.2,<0.14",
+]
+
+[tool.uv]
+default-groups = "all"
+override-dependencies = [
+    "psycopg2 ; sys_platform == 'never'"
+]
+
+[tool.uv.sources]
+gnomad = { path = "third_party/gnomad_methods" }
+gnomad-qc = { path = "third_party/gnomad_qc" }
+
+[build-system]
+requires = ["uv_build>=0.11.16,<0.12.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+# Integration tests live under tests/integration and drive the pipeline CLI as
+# subprocesses (see docs/adr/0001-integration-tests-use-subprocess-cli-seam.md).
+# The default development loop excludes the slow, network-dependent VQSR test:
+#   pytest -m "integration and not vqsr"
+testpaths = ["tests/unit", "tests/integration"]
+addopts = "--capture=tee-sys"
+markers = [
+    "integration: integration tests that drive the pipeline CLI",
+    "vqsr: tests that run the full VQSR snakemake pipeline (slow, needs network)",
+    "real_hail_init: unit tests that exercise the real hail_init boot (opt out of the no-op fixture)",
+]
+
+[tool.ruff]
+# Set a line length of 88, which is Black's default.
+line-length = 88
+# The codebase uses PEP 695 type-parameter syntax (``class Serializer[T]``),
+# which is Python 3.12+. Pin the target so ruff parses it.
+target-version = "py312"
+# Exclude snakemake wrappers due to their peculiar style
+# (i.e. undefined snakemake variable, etc.)
+exclude = ["gnomad_meb/vqsr/wrapper/", "gnomad_meb/regenie/wrapper/"]
+
+[tool.ruff.lint]
+# Enable isort and other useful linters.
+select = ["E", "F", "I", "B", "UP", "C4", "RUF", "S"]
+# Ignore:
+#   S101 - Use of assert detected
+#   B006 - Not use mutable data structures for argument defaults
+ignore = ["S101", "B006"]
+
+[tool.ruff.lint.per-file-ignores]
+"hail.py" = ["E501"]
+"gnomad_meb/lib/sample_qc/pipeline.py" = ["E501"]
+# The checkpoint package was split verbatim from a 1291-line module. Its long
+# log/warning f-strings (E501) and its provenance md5 hashes / trusted-pickle
+# reads (S324, S301) are inherited unchanged; they are not cryptographic or
+# untrusted-data uses, so they are ignored here rather than rewritten.
+"src/gnomad_meb/lib/checkpoint/*.py" = ["B007", "E501", "S301", "S324"]
+"src/gnomad_meb/lib/checkpoint/serializers/*.py" = ["B007", "E501", "S301", "S324"]
+# Slurm submission drivers call sbatch/uv/bash on purpose; the executable paths
+# are the cluster's, not attacker-controlled input.
+"slurm/*.py" = ["S603", "S607"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["gnomad_meb"]
+
+[tool.marimo.display]
+default_table_page_size = 100
+default_table_max_columns = 200
+default_width = "full"

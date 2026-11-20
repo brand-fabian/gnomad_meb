@@ -1,0 +1,11 @@
+name: gatk ApplyVQSR
+description: Wrapper for gatk ApplyVQSR
+authors:
+  - Fabian Brand
+input:
+  - gatk VariantRecalibrator recal file
+  - input vcf
+  - global tranches file
+  - (optional) interval file to subset analysis to
+output:
+  - recalibrated vcf file

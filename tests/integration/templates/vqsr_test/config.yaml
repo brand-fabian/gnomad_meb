@@ -1,0 +1,13 @@
+# Snakemake workflow-profile vqsr
+jobs: 10
+cores: 8
+max-jobs-per-second: 3
+use-conda: true
+rerun-incomplete: true
+keep-going: true
+executor: local
+# default-resources:
+#   slurm_partition: intelsr_medium
+#   slurm_extra: str("")
+# set-resources requires at least one argument
+# set-resources: {}

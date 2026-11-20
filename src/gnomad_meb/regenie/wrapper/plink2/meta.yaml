@@ -1,0 +1,8 @@
+name: plink2
+description: Wrapper for plink2.
+authors:
+  - Fabian Brand
+input:
+  - bed/bim/fam files formatted for plink2
+output:
+  - command outputs

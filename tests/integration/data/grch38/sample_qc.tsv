@@ -1,0 +1,15 @@
+sample_id	inferred_sex	sex_karyotype	inferred_family_id	ancestry	hard_filter
+R_0001_0001_S	M	XY	R_0001_0001_S	nfe	low_bases_dp_over_1;low_coverage
+R_0001_0017_M	F	XX	R_0001_0001_S	nfe	low_bases_dp_over_1;low_bases_dp_over_20;low_coverage
+R_0001_0029_I	F	XX	R_0001_0001_S	nfe	low_bases_dp_over_1;low_bases_dp_over_20;low_coverage
+R_0001_0030_I	F	XX	R_0001_0001_S	nfe	low_bases_dp_over_1;low_bases_dp_over_20;low_coverage
+R_0003_0003_S	M	XY	R_0003_0003_S	nfe	low_bases_dp_over_1;low_bases_dp_over_20;low_coverage
+R_0003_0042_M	F	XX	R_0003_0003_S	nfe	low_bases_dp_over_1;low_bases_dp_over_20;low_coverage
+R_0003_0044_I	F	XX	R_0003_0003_S	nfe	low_bases_dp_over_1;low_bases_dp_over_20;low_coverage
+R_0018_0018_S	M	XY	R_0018_0018_S	nfe	low_bases_dp_over_1;low_bases_dp_over_20;low_coverage
+R_0018_0023_M	F	XX	R_0018_0018_S	nfe	low_bases_dp_over_1;low_bases_dp_over_20;low_coverage
+R_0018_0024_I	M	XY	R_0018_0018_S	nfe	low_bases_dp_over_1;low_bases_dp_over_20;low_coverage
+R_0025_0025_S		ambiguous	R_0025_0025_S	nfe	ambiguous_sex;low_bases_dp_over_1;low_bases_dp_over_20;low_coverage
+R_0025_0026_M	F	XX	R_0025_0025_S	nfe	low_bases_dp_over_1;low_bases_dp_over_20;low_coverage
+R_0025_0027_I	F	XX	R_0025_0025_S	nfe	low_bases_dp_over_1;low_bases_dp_over_20;low_coverage
+R_0025_0035_I	M	XY	R_0025_0025_S	nfe	low_bases_dp_over_1;low_bases_dp_over_20;low_coverage

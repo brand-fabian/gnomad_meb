@@ -1,0 +1,4 @@
+name: bcftools concat
+description: Concat a set of VCF/BCF files with the same set of samples into one file
+authors:
+  - Fabian Brand
